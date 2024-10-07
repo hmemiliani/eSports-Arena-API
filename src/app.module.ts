@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RolesModule } from './roles/roles.module';
+import { UsersModule } from './users/users.module';
+import { TournamentsModule } from './tournaments/tournaments.module';
 
 @Module({
   imports: [
@@ -17,6 +20,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         username: configService.get<string>('DATABASE_USER'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
         autoLoadEntities: true,
         synchronize: true,
         ssl: {
@@ -24,6 +28,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         },
       }),
     }),
+    RolesModule,
+    UsersModule,
+    TournamentsModule,
   ],
 })
 export class AppModule {}
