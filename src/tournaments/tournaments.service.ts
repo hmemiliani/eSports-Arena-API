@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Tournament } from './entities/tournament.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Match } from 'src/matches/entities/match.entity';
+import { CreateTournamentDto } from './dto/create-tournament.dto';
 
 @Injectable()
 export class TournamentsService {
@@ -20,7 +21,8 @@ export class TournamentsService {
     return this.tournamentsRepository.find({ relations: ['participants'] });
   }
 
-  create(tournament: Tournament): Promise<Tournament> {
+  async create(createTournamentDto: CreateTournamentDto): Promise<Tournament> {
+    const tournament = this.tournamentsRepository.create(createTournamentDto);
     return this.tournamentsRepository.save(tournament);
   }
 

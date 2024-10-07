@@ -3,6 +3,7 @@ import { MatchesService } from './matches.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { RegisterMatchResultDto } from './dto/register-match-result.dto';
 
 @Controller('matches')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -18,10 +19,9 @@ export class MatchesController {
   @Post(':id/register-result')
   async registerMatchResult(
     @Param('id') matchId: string,
-    @Body('winnerId') winnerId: number,
-    @Body('player1Score') player1Score: number,
-    @Body('player2Score') player2Score: number,
+    @Body() registerMatchResultDto: RegisterMatchResultDto,
   ) {
+    const { winnerId, player1Score, player2Score } = registerMatchResultDto;
     return this.matchesService.registerMatchResult(
       +matchId,
       winnerId,
