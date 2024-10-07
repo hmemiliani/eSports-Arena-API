@@ -5,7 +5,6 @@ import { RolesModule } from './roles/roles.module';
 import { UsersModule } from './users/users.module';
 import { TournamentsModule } from './tournaments/tournaments.module';
 import { AuthModule } from './auth/auth.module';
-import { TournamentsModule } from './tournaments/tournaments.module';
 
 @Module({
   imports: [

@@ -6,7 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 import { LocalStrategy } from './local.strategy';
 import { AuthController } from './auth.controller';
-import { LocalAuthGuard } from './local-auth.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Module({
   imports: [
