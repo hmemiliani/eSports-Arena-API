@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RolesModule } from './roles/roles.module';
 import { UsersModule } from './users/users.module';
 import { TournamentsModule } from './tournaments/tournaments.module';
+import { TournamentsModule } from './tournaments/tournaments.module';
 
 @Module({
   imports: [
