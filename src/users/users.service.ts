@@ -10,6 +10,13 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
+  findOneByUsername(username: string): Promise<User> {
+    return this.usersRepository.findOne({
+      where: { username },
+      relations: ['role'],
+    });
+  }
+
   findAll(): Promise<User[]> {
     return this.usersRepository.find({ relations: ['role'] });
   }
