@@ -47,4 +47,15 @@ export class TournamentsController {
     const userId = req.user.userId;
     return this.tournamentsService.addPlayerToTournament(+tournamentId, userId);
   }
+
+  @Roles('Admin')
+  @Post(':id/organize-matches')
+  async organizeMatches(@Param('id') tournamentId: string) {
+    return this.tournamentsService.organizeMatches(+tournamentId);
+  }
+
+  @Get(':id/leaderboard')
+  async getLeaderboard(@Param('id') tournamentId: string) {
+    return this.tournamentsService.getLeaderboard(+tournamentId);
+  }
 }

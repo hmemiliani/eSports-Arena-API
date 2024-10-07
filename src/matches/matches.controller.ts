@@ -1,0 +1,32 @@
+import { Controller, Post, Body, Param, UseGuards, Get } from '@nestjs/common';
+import { MatchesService } from './matches.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+
+@Controller('matches')
+@UseGuards(JwtAuthGuard, RolesGuard)
+export class MatchesController {
+  constructor(private readonly matchesService: MatchesService) {}
+
+  @Get('tournament/:tournamentId')
+  async getMatchesByTournament(@Param('tournamentId') tournamentId: string) {
+    return this.matchesService.getMatchesByTournament(+tournamentId);
+  }
+
+  @Roles('Admin')
+  @Post(':id/register-result')
+  async registerMatchResult(
+    @Param('id') matchId: string,
+    @Body('winnerId') winnerId: number,
+    @Body('player1Score') player1Score: number,
+    @Body('player2Score') player2Score: number,
+  ) {
+    return this.matchesService.registerMatchResult(
+      +matchId,
+      winnerId,
+      player1Score,
+      player2Score,
+    );
+  }
+}

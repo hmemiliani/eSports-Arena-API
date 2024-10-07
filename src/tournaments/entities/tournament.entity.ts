@@ -4,8 +4,10 @@ import {
   Column,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { Match } from 'src/matches/entities/match.entity';
 
 @Entity()
 export class Tournament {
@@ -27,4 +29,7 @@ export class Tournament {
   @ManyToMany(() => User, (user) => user.tournaments)
   @JoinTable()
   participants: User[];
+
+  @OneToMany(() => Match, (match) => match.tournament, { cascade: true })
+  matches: Match[];
 }

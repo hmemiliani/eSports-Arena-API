@@ -5,6 +5,7 @@ import { RolesModule } from './roles/roles.module';
 import { UsersModule } from './users/users.module';
 import { TournamentsModule } from './tournaments/tournaments.module';
 import { AuthModule } from './auth/auth.module';
+import { MatchesModule } from './matches/matches.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     TournamentsModule,
     AuthModule,
+    MatchesModule,
   ],
 })
 export class AppModule {}

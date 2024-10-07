@@ -10,7 +10,6 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  // Validar usuario por username y password
   async validateUser(username: string, password: string): Promise<any> {
     const user = await this.usersService.findOneByUsername(username);
     if (user && (await bcrypt.compare(password, user.password))) {
@@ -20,7 +19,6 @@ export class AuthService {
     throw new UnauthorizedException('Invalid username or password');
   }
 
-  // Login: Retornar JWT al usuario
   async login(user: any) {
     const payload = {
       username: user.username,
