@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsDateString } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt, Min, IsDate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTournamentDto {
@@ -16,15 +16,20 @@ export class CreateTournamentDto {
     description: 'Fecha de inicio del torneo',
     example: '2024-01-01',
   })
-  @IsDateString()
   @IsNotEmpty()
-  startDate: string;
+  @IsDate()
+  startDate: Date;
 
   @ApiProperty({
     description: 'Fecha de finalización del torneo',
     example: '2024-01-10',
   })
-  @IsDateString()
   @IsNotEmpty()
-  endDate: string;
+  @IsDate()
+  endDate: Date;
+
+  @ApiProperty({ description: 'Maximum number of participants', example: 16 })
+  @IsInt()
+  @Min(2)
+  maxParticipants: number;
 }

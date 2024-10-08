@@ -16,15 +16,16 @@ export class AuthService {
       const { ...result } = user;
       return result;
     }
-    throw new UnauthorizedException('Invalid username or password');
+    return null;
+    //throw new UnauthorizedException('Invalid username or password');
   }
 
   async login(user: any) {
-    const payload = {
-      username: user.username,
-      sub: user.id,
-      role: user.role.name,
-    };
+    if (!user) {
+      throw new UnauthorizedException('Invalid username or password');
+    }
+
+    const payload = { username: user.username, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
     };

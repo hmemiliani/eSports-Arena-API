@@ -20,11 +20,14 @@ export class Tournament {
   @Column({ type: 'text' })
   description: string;
 
-  @Column()
+  @Column({ type: 'timestamp' })
   startDate: Date;
 
-  @Column()
+  @Column({ type: 'timestamp' })
   endDate: Date;
+
+  @Column({ default: 16 })
+  maxParticipants: number;
 
   @ManyToMany(() => User, (user) => user.tournaments)
   @JoinTable()
@@ -32,4 +35,5 @@ export class Tournament {
 
   @OneToMany(() => Match, (match) => match.tournament, { cascade: true })
   matches: Match[];
+  users: any;
 }

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Tournament } from './entities/tournament.entity';
@@ -17,8 +21,17 @@ export class TournamentsService {
     private matchesRepository: Repository<Match>,
   ) {}
 
-  findAll(): Promise<Tournament[]> {
-    return this.tournamentsRepository.find({ relations: ['participants'] });
+  async findAll(page: number, limit: number) {
+    const [tournaments, total] = await this.tournamentsRepository.findAndCount({
+      take: limit,
+      skip: (page - 1) * limit,
+    });
+    return {
+      total,
+      page,
+      limit,
+      data: tournaments,
+    };
   }
 
   async create(createTournamentDto: CreateTournamentDto): Promise<Tournament> {
@@ -37,65 +50,73 @@ export class TournamentsService {
     await this.tournamentsRepository.delete(id);
   }
 
-  async addPlayerToTournament(
-    tournamentId: number,
-    userId: number,
-  ): Promise<Tournament> {
+  async addPlayerToTournament(tournamentId: number, userId: number) {
     const tournament = await this.tournamentsRepository.findOne({
       where: { id: tournamentId },
-      relations: ['participants'],
+      relations: ['users'],
     });
-
     if (!tournament) {
-      throw new NotFoundException(
-        `Tournament with ID ${tournamentId} not found`,
+      throw new NotFoundException('Tournament not found.');
+    }
+
+    const isUserInTournament = tournament.users.some(
+      (user) => user.id === userId,
+    );
+    if (isUserInTournament) {
+      throw new BadRequestException(
+        'The user is already registered for this tournament.',
       );
     }
-
+    if (tournament.startDate >= tournament.endDate) {
+      throw new BadRequestException(
+        'The start date must be before the end date.',
+      );
+    }
+    if (tournament.users.length >= tournament.maxParticipants) {
+      throw new BadRequestException(
+        'The tournament has reached the maximum number of participants.',
+      );
+    }
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
+      throw new NotFoundException('User not found.');
     }
-
-    if (
-      !tournament.participants.some((participant) => participant.id === user.id)
-    ) {
-      tournament.participants.push(user);
-      await this.tournamentsRepository.save(tournament);
-    }
+    tournament.users.push(user);
+    await this.tournamentsRepository.save(tournament);
 
     return tournament;
   }
 
-  async organizeMatches(tournamentId: number): Promise<Match[]> {
+  async organizeMatches(tournamentId: number) {
     const tournament = await this.tournamentsRepository.findOne({
       where: { id: tournamentId },
-      relations: ['participants', 'matches'],
+      relations: ['users', 'matches'],
     });
-
     if (!tournament) {
-      throw new NotFoundException(
-        `Tournament with ID ${tournamentId} not found`,
-      );
+      throw new NotFoundException('Tournament not found.');
     }
-
-    const shuffledPlayers = tournament.participants.sort(
-      () => Math.random() - 0.5,
-    );
-    const matches: Match[] = [];
-
-    for (let i = 0; i < shuffledPlayers.length; i += 2) {
-      if (i + 1 < shuffledPlayers.length) {
-        const match = this.matchesRepository.create({
-          tournament: tournament,
-          player1: shuffledPlayers[i],
-          player2: shuffledPlayers[i + 1],
-        });
-        matches.push(match);
-      }
+    if (tournament.matches.length > 0) {
+      throw new BadRequestException('The matches have already been organized.');
     }
+    const players = [...tournament.users];
+    while (players.length > 1) {
+      const player1 = players.splice(
+        Math.floor(Math.random() * players.length),
+        1,
+      )[0];
+      const player2 = players.splice(
+        Math.floor(Math.random() * players.length),
+        1,
+      )[0];
 
-    return this.matchesRepository.save(matches);
+      const match = this.matchesRepository.create({
+        tournament,
+        player1,
+        player2,
+      });
+      await this.matchesRepository.save(match);
+    }
+    return tournament;
   }
 
   async getLeaderboard(tournamentId: number): Promise<any[]> {

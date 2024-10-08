@@ -19,7 +19,7 @@ export class User {
   @Column()
   password: string;
 
-  @ManyToOne(() => Role, (role) => role.id)
+  @ManyToOne(() => Role, (role) => role.users, { eager: true })
   role: Role;
 
   @ManyToMany(() => Tournament, (tournament) => tournament.participants)
