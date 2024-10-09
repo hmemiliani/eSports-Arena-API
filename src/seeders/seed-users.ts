@@ -59,9 +59,6 @@ export class UsersSeeder {
       if (!existingUser) {
         const newUser = this.userRepository.create(userData);
         await this.userRepository.save(newUser);
-        console.log(`User ${userData.username} created successfully.`);
-      } else {
-        console.log(`User ${userData.username} already exists.`);
       }
     }
   }
