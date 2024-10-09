@@ -41,8 +41,7 @@ $ npm run start
 # watch mode
 $ npm run start:dev
 
-# production mode
-$ npm run start:prod
+
 ```
 
 ## Run tests
@@ -56,6 +55,18 @@ $ npm run test:e2e
 
 # test coverage
 $ npm run test:cov
+```
+
+
+## Environment Variables (.env)
+
+```bash
+DATABASE_HOST=
+DATABASE_PORT=
+DATABASE_USER=
+DATABASE_PASSWORD=
+DATABASE_NAME=
+JWT_SECRET=
 ```
 
 ## Resources
