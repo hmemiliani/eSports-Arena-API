@@ -57,6 +57,18 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+
+## Environment Variables (.env)
+
+```bash
+DATABASE_HOST=
+DATABASE_PORT=
+DATABASE_USER=
+DATABASE_PASSWORD=
+DATABASE_NAME=
+JWT_SECRET=
+```
+
 ## Resources
 
 Check out a few resources that may come in handy when working with NestJS:

@@ -19,34 +19,33 @@ import {
 export class MatchesController {
   constructor(private readonly matchesService: MatchesService) {}
 
-  @ApiOperation({ summary: 'Obtener todos los enfrentamientos de un torneo' })
-  @ApiParam({ name: 'tournamentId', description: 'ID del torneo' })
+  @ApiOperation({ summary: 'Get all the matches of a tournament' })
+  @ApiParam({ name: 'tournamentId', description: 'Tournament ID' })
   @ApiResponse({
     status: 200,
-    description: 'Lista de enfrentamientos obtenida correctamente.',
+    description: 'List of matches obtained successfully.',
   })
   @Get('tournament/:tournamentId')
   async getMatchesByTournament(@Param('tournamentId') tournamentId: string) {
     return this.matchesService.getMatchesByTournament(+tournamentId);
   }
 
-  @ApiOperation({ summary: 'Registrar el resultado de un enfrentamiento' })
-  @ApiParam({ name: 'id', description: 'ID del enfrentamiento' })
+  @ApiOperation({ summary: 'Record the outcome of a match' })
+  @ApiParam({ name: 'id', description: 'Match ID' })
   @ApiResponse({
     status: 200,
-    description: 'Resultado registrado correctamente.',
+    description: 'Result registered successfully.',
   })
-  @ApiResponse({ status: 404, description: 'Enfrentamiento no encontrado.' })
+  @ApiResponse({ status: 404, description: 'Match not found.' })
   @Roles('Admin')
   @Post(':id/register-result')
   async registerMatchResult(
     @Param('id') matchId: string,
     @Body() registerMatchResultDto: RegisterMatchResultDto,
   ) {
-    const { winnerId, player1Score, player2Score } = registerMatchResultDto;
+    const { player1Score, player2Score } = registerMatchResultDto;
     return this.matchesService.registerMatchResult(
       +matchId,
-      winnerId,
       player1Score,
       player2Score,
     );

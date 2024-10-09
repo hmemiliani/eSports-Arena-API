@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role } from './entities/role.entity';
@@ -22,7 +22,11 @@ export class RolesService {
     return this.rolesRepository.findOneBy({ name });
   }
 
-  async remove(id: number): Promise<void> {
-    await this.rolesRepository.softDelete(id);
+  async remove(id: number): Promise<{ message: string }> {
+    const result = await this.rolesRepository.softDelete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Role with ID ${id} not found.`);
+    }
+    return { message: 'Role successfully deleted.' };
   }
 }

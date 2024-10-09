@@ -16,7 +16,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Tournament API')
-    .setDescription('API para gestionar torneos y enfrentamientos')
+    .setDescription('API for managing eSports')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

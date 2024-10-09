@@ -30,7 +30,6 @@ export class MatchesService {
 
   async registerMatchResult(
     matchId: number,
-    winnerId: number,
     player1Score: number,
     player2Score: number,
   ): Promise<Match> {
@@ -42,9 +41,16 @@ export class MatchesService {
       throw new NotFoundException(`Match with ID ${matchId} not found`);
     }
 
-    match.winnerId = winnerId;
     match.player1Score = player1Score;
     match.player2Score = player2Score;
+
+    if (player1Score > player2Score) {
+      match.winnerId = match.player1.id;
+    } else if (player2Score > player1Score) {
+      match.winnerId = match.player2.id;
+    } else {
+      match.winnerId = null;
+    }
 
     return this.matchesRepository.save(match);
   }

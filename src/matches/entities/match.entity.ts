@@ -19,7 +19,7 @@ export class Match {
   player2: User;
 
   @Column({ nullable: true })
-  winnerId: number;
+  winnerId: number | null;
 
   @Column({ type: 'int', default: 0 })
   player1Score: number;

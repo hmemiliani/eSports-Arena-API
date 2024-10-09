@@ -10,8 +10,6 @@ import {
 } from '@nestjs/common';
 import { TournamentsService } from './tournaments.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
 import { JoinTournamentDto } from './dto/join-tournament.dto';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import {
@@ -22,61 +20,69 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 
-@ApiTags('Tournaments') // Agrupa las rutas bajo la categoría "Tournaments"
-@ApiBearerAuth() // Indica que las rutas requieren autenticación JWT
-@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiTags('Tournaments')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('tournaments')
 export class TournamentsController {
   constructor(private readonly tournamentsService: TournamentsService) {}
 
-  @ApiOperation({ summary: 'Obtener todos los torneos' })
+  @ApiOperation({ summary: 'Get all tournaments' })
   @ApiResponse({
     status: 200,
-    description: 'Lista de torneos obtenida correctamente.',
+    description: 'Tournament list obtained successfully.',
   })
   @Get()
   findAll(@Param('page') page: number, @Param('limit') limit: number) {
     return this.tournamentsService.findAll(page, limit);
   }
 
-  @ApiOperation({ summary: 'Crear un nuevo torneo' })
-  @ApiResponse({ status: 201, description: 'Torneo creado correctamente.' })
-  @Roles('Admin')
+  @ApiOperation({ summary: 'Create a new tournament' })
+  @ApiResponse({ status: 201, description: 'Tournament created successfully.' })
   @Post()
   async create(@Body() createTournamentDto: CreateTournamentDto) {
     return this.tournamentsService.create(createTournamentDto);
   }
 
-  @ApiOperation({ summary: 'Obtener detalles de un torneo' })
-  @ApiParam({ name: 'id', description: 'ID del torneo' })
+  @ApiOperation({ summary: 'Get details of a tournament' })
+  @ApiParam({ name: 'id', description: 'Tournament ID' })
   @ApiResponse({
     status: 200,
-    description: 'Detalles del torneo obtenidos correctamente.',
+    description: 'Tournament details obtained successfully.',
   })
-  @ApiResponse({ status: 404, description: 'Torneo no encontrado.' })
+  @ApiResponse({ status: 404, description: 'Tournament not found.' })
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.tournamentsService.findOneById(+id);
   }
 
-  @ApiOperation({ summary: 'Eliminar un torneo' })
-  @ApiParam({ name: 'id', description: 'ID del torneo' })
-  @ApiResponse({ status: 200, description: 'Torneo eliminado correctamente.' })
-  @ApiResponse({ status: 404, description: 'Torneo no encontrado.' })
-  @Roles('Admin')
+  @ApiOperation({ summary: 'Delete a tournament' })
+  @ApiParam({ name: 'id', description: 'Tournament ID' })
+  @ApiResponse({ status: 200, description: 'Tournament successfully removed.' })
+  @ApiResponse({ status: 404, description: 'Tournament not found.' })
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tournamentsService.remove(+id);
+  async remove(@Param('id') id: string) {
+    try {
+      await this.tournamentsService.remove(+id);
+      return {
+        statusCode: 200,
+        message: 'Tournament successfully removed.',
+      };
+    } catch (error) {
+      return {
+        statusCode: 404,
+        message: error.message,
+      };
+    }
   }
 
-  @ApiOperation({ summary: 'Unirse a un torneo' })
-  @ApiParam({ name: 'id', description: 'ID del torneo' })
+  @ApiOperation({ summary: 'Join a tournament' })
+  @ApiParam({ name: 'id', description: 'Tournament ID' })
   @ApiResponse({
     status: 200,
-    description: 'Usuario unido al torneo correctamente.',
+    description: 'User joined the tournament successfully.',
   })
-  @ApiResponse({ status: 404, description: 'Torneo o usuario no encontrado.' })
-  @Roles('Player')
+  @ApiResponse({ status: 404, description: 'Tournament or user not found.' })
   @Post(':id/join')
   async joinTournament(@Param('id') tournamentId: string, @Request() req) {
     const userId = req.user.userId;
@@ -85,26 +91,25 @@ export class TournamentsController {
     return this.tournamentsService.addPlayerToTournament(+tournamentId, userId);
   }
 
-  @ApiOperation({ summary: 'Organizar enfrentamientos en un torneo' })
-  @ApiParam({ name: 'id', description: 'ID del torneo' })
+  @ApiOperation({ summary: 'Organizing matches in a tournament' })
+  @ApiParam({ name: 'id', description: 'Tournament ID' })
   @ApiResponse({
     status: 200,
-    description: 'Enfrentamientos organizados correctamente.',
+    description: 'Matches organized correctly.',
   })
-  @ApiResponse({ status: 404, description: 'Torneo no encontrado.' })
-  @Roles('Admin')
+  @ApiResponse({ status: 404, description: 'Tournament not found.' })
   @Post(':id/organize-matches')
   async organizeMatches(@Param('id') tournamentId: string) {
     return this.tournamentsService.organizeMatches(+tournamentId);
   }
 
-  @ApiOperation({ summary: 'Obtener la clasificación del torneo' })
-  @ApiParam({ name: 'id', description: 'ID del torneo' })
+  @ApiOperation({ summary: 'Get the tournament ranking' })
+  @ApiParam({ name: 'id', description: 'Tournament ID' })
   @ApiResponse({
     status: 200,
-    description: 'Clasificación del torneo obtenida correctamente.',
+    description: 'Tournament ranking obtained successfully.',
   })
-  @ApiResponse({ status: 404, description: 'Torneo no encontrado.' })
+  @ApiResponse({ status: 404, description: 'Tournament not found.' })
   @Get(':id/leaderboard')
   async getLeaderboard(@Param('id') tournamentId: string) {
     return this.tournamentsService.getLeaderboard(+tournamentId);

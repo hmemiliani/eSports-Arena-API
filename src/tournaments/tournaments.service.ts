@@ -21,17 +21,23 @@ export class TournamentsService {
     private matchesRepository: Repository<Match>,
   ) {}
 
-  async findAll(page: number, limit: number) {
-    const [tournaments, total] = await this.tournamentsRepository.findAndCount({
-      take: limit,
-      skip: (page - 1) * limit,
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ data: Tournament[]; count: number }> {
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+
+    if (isNaN(pageNumber) || isNaN(limitNumber)) {
+      throw new Error('Page and limit must be numbers.');
+    }
+
+    const [data, count] = await this.tournamentsRepository.findAndCount({
+      skip: (pageNumber - 1) * limitNumber,
+      take: limitNumber,
     });
-    return {
-      total,
-      page,
-      limit,
-      data: tournaments,
-    };
+
+    return { data, count };
   }
 
   async create(createTournamentDto: CreateTournamentDto): Promise<Tournament> {
@@ -53,13 +59,13 @@ export class TournamentsService {
   async addPlayerToTournament(tournamentId: number, userId: number) {
     const tournament = await this.tournamentsRepository.findOne({
       where: { id: tournamentId },
-      relations: ['users'],
+      relations: ['participants'],
     });
     if (!tournament) {
       throw new NotFoundException('Tournament not found.');
     }
 
-    const isUserInTournament = tournament.users.some(
+    const isUserInTournament = tournament.participants.some(
       (user) => user.id === userId,
     );
     if (isUserInTournament) {
@@ -67,21 +73,25 @@ export class TournamentsService {
         'The user is already registered for this tournament.',
       );
     }
+
     if (tournament.startDate >= tournament.endDate) {
       throw new BadRequestException(
         'The start date must be before the end date.',
       );
     }
-    if (tournament.users.length >= tournament.maxParticipants) {
+
+    if (tournament.participants.length >= tournament.maxParticipants) {
       throw new BadRequestException(
         'The tournament has reached the maximum number of participants.',
       );
     }
+
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found.');
     }
-    tournament.users.push(user);
+
+    tournament.participants.push(user);
     await this.tournamentsRepository.save(tournament);
 
     return tournament;
@@ -90,15 +100,21 @@ export class TournamentsService {
   async organizeMatches(tournamentId: number) {
     const tournament = await this.tournamentsRepository.findOne({
       where: { id: tournamentId },
-      relations: ['users', 'matches'],
+      relations: ['participants', 'matches'],
     });
+
     if (!tournament) {
       throw new NotFoundException('Tournament not found.');
     }
+
     if (tournament.matches.length > 0) {
       throw new BadRequestException('The matches have already been organized.');
     }
-    const players = [...tournament.users];
+
+    const players = [...tournament.participants];
+
+    const newMatches: Match[] = [];
+
     while (players.length > 1) {
       const player1 = players.splice(
         Math.floor(Math.random() * players.length),
@@ -114,9 +130,14 @@ export class TournamentsService {
         player1,
         player2,
       });
-      await this.matchesRepository.save(match);
+      const savedMatch = await this.matchesRepository.save(match);
+      newMatches.push(savedMatch);
     }
-    return tournament;
+
+    return {
+      ...tournament,
+      matches: newMatches,
+    };
   }
 
   async getLeaderboard(tournamentId: number): Promise<any[]> {

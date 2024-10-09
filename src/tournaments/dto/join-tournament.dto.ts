@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class JoinTournamentDto {
   @ApiProperty({
-    description: 'ID del usuario que se unirá al torneo',
+    description: 'ID of the user who will join the tournament',
     example: 1,
   })
   @IsNumber()

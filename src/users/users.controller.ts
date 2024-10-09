@@ -5,13 +5,11 @@ import {
   Body,
   Param,
   Delete,
-  UseGuards,
   Request,
+  NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -21,53 +19,72 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('Users')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiOperation({ summary: 'Obtener todos los usuarios' })
+  @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({
     status: 200,
-    description: 'Lista de usuarios obtenida correctamente.',
+    description: 'User list obtained successfully.',
   })
   @Roles('Admin')
   @Get()
   findAll() {
     return this.usersService.findAll();
   }
+
   @ApiOperation({ summary: 'Create a new user' })
   @ApiResponse({ status: 201, description: 'User successfully created.' })
   @ApiBody({ type: CreateUserDto })
   @Roles('Admin')
   @Post()
   async create(@Body() createUserDto: CreateUserDto, @Request() req) {
-    return this.usersService.create(createUserDto, req.user.isAdmin);
+    const isAdmin = req.user?.isAdmin || false;
+    return this.usersService.create(createUserDto, isAdmin);
   }
 
-  @ApiOperation({ summary: 'Obtener un usuario por ID' })
-  @ApiParam({ name: 'id', description: 'ID del usuario' })
+  @ApiOperation({ summary: 'Get a user by ID' })
+  @ApiParam({ name: 'id', description: 'User ID' })
   @ApiResponse({
     status: 200,
-    description: 'Detalles del usuario obtenidos correctamente.',
+    description: 'User details fetched successfully.',
   })
-  @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
-  @Roles('Admin')
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  @Roles('Admin', 'Player')
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOneById(+id);
   }
 
-  @ApiOperation({ summary: 'Eliminar un usuario' })
-  @ApiParam({ name: 'id', description: 'ID del usuario' })
-  @ApiResponse({ status: 200, description: 'Usuario eliminado correctamente.' })
-  @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
+  @ApiOperation({ summary: 'Delete a user' })
+  @ApiParam({ name: 'id', description: 'User ID' })
+  @ApiResponse({ status: 200, description: 'User successfully deleted.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
   @Roles('Admin')
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  async remove(@Param('id') id: string) {
+    try {
+      await this.usersService.remove(+id);
+      return {
+        statusCode: 200,
+        message: 'User successfully deleted.',
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        return {
+          statusCode: 404,
+          message: error.message,
+        };
+      }
+      throw error;
+    }
   }
 }

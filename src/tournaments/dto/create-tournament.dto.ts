@@ -1,31 +1,34 @@
 import { IsString, IsNotEmpty, IsInt, Min, IsDate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateTournamentDto {
-  @ApiProperty({ description: 'Nombre del torneo' })
+  @ApiProperty({ description: 'Tournament name' })
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ description: 'Descripción del torneo' })
+  @ApiProperty({ description: 'Tournament Description' })
   @IsString()
   @IsNotEmpty()
   description: string;
 
   @ApiProperty({
-    description: 'Fecha de inicio del torneo',
-    example: '2024-01-01',
+    description: 'Tournament start date',
+    example: 'DD-MM-YYYY',
   })
   @IsNotEmpty()
   @IsDate()
+  @Type(() => Date)
   startDate: Date;
 
   @ApiProperty({
-    description: 'Fecha de finalización del torneo',
-    example: '2024-01-10',
+    description: 'Tournament end date',
+    example: 'DD-MM-YYYY',
   })
   @IsNotEmpty()
   @IsDate()
+  @Type(() => Date)
   endDate: Date;
 
   @ApiProperty({ description: 'Maximum number of participants', example: 16 })

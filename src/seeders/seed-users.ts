@@ -22,35 +22,46 @@ export class UsersSeeder {
       where: { name: 'Player' },
     });
 
+    if (!adminRole || !playerRole) {
+      throw new Error(
+        'Roles "Admin" and "Player" must exist before seeding users.',
+      );
+    }
+
     const users = [
       {
         username: 'admin',
         password: await bcrypt.hash('password', 10),
-        roles: [adminRole],
+        role: adminRole,
       },
       {
         username: 'player1',
         password: await bcrypt.hash('password', 10),
-        roles: [playerRole],
+        role: playerRole,
       },
       {
         username: 'player2',
         password: await bcrypt.hash('password', 10),
-        roles: [playerRole],
+        role: playerRole,
       },
       {
         username: 'player3',
         password: await bcrypt.hash('password', 10),
-        roles: [playerRole],
+        role: playerRole,
       },
     ];
 
-    for (const user of users) {
+    for (const userData of users) {
       const existingUser = await this.userRepository.findOne({
-        where: { username: user.username },
+        where: { username: userData.username },
       });
+
       if (!existingUser) {
-        await this.userRepository.save(this.userRepository.create(user));
+        const newUser = this.userRepository.create(userData);
+        await this.userRepository.save(newUser);
+        console.log(`User ${userData.username} created successfully.`);
+      } else {
+        console.log(`User ${userData.username} already exists.`);
       }
     }
   }

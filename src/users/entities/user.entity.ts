@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   ManyToMany,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
 import { Tournament } from 'src/tournaments/entities/tournament.entity';
@@ -24,4 +25,7 @@ export class User {
 
   @ManyToMany(() => Tournament, (tournament) => tournament.participants)
   tournaments: Tournament[];
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

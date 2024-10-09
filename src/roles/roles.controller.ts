@@ -29,19 +29,21 @@ import { CreateRoleDto } from './dto/create-role.dto';
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
-  @ApiOperation({ summary: 'Obtener todos los roles' })
+  @ApiOperation({ summary: 'Get all roles' })
   @ApiResponse({
     status: 200,
-    description: 'Lista de roles obtenida correctamente.',
+    description: 'List of roles obtained successfully.',
   })
+  @Roles('Admin')
   @Get()
   findAll() {
     return this.rolesService.findAll();
   }
 
   @ApiOperation({ summary: 'Create a new role' })
-  @ApiResponse({ status: 201, description: 'Role successfully created.' })
+  @ApiResponse({ status: 201, description: 'Role created successfully.' })
   @ApiBody({ type: CreateRoleDto })
+  @Roles('Admin')
   @Post()
   create(@Body() createRoleDto: CreateRoleDto) {
     const role = new Role();
@@ -49,22 +51,23 @@ export class RolesController {
     return this.rolesService.create(role);
   }
 
-  @ApiOperation({ summary: 'Obtener un rol por nombre' })
-  @ApiParam({ name: 'name', description: 'Nombre del rol' })
-  @ApiResponse({ status: 200, description: 'Rol encontrado correctamente.' })
-  @ApiResponse({ status: 404, description: 'Rol no encontrado.' })
+  @ApiOperation({ summary: 'Get a role by name' })
+  @ApiParam({ name: 'name', description: 'Role Name' })
+  @ApiResponse({ status: 200, description: 'Role found successfully.' })
+  @ApiResponse({ status: 404, description: 'Role not found.' })
+  @Roles('Admin')
   @Get(':name')
   findOne(@Param('name') name: string) {
     return this.rolesService.findOneByName(name);
   }
 
-  @ApiOperation({ summary: 'Eliminar un rol' })
-  @ApiParam({ name: 'id', description: 'ID del rol' })
-  @ApiResponse({ status: 200, description: 'Rol eliminado correctamente.' })
-  @ApiResponse({ status: 404, description: 'Rol no encontrado.' })
+  @ApiOperation({ summary: 'Delete a role' })
+  @ApiParam({ name: 'id', description: 'Role ID' })
+  @ApiResponse({ status: 200, description: 'Role deleted successfully.' })
+  @ApiResponse({ status: 404, description: 'Role not found.' })
   @Roles('Admin')
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     return this.rolesService.remove(+id);
   }
 }
